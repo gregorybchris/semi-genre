@@ -13,7 +13,7 @@ class SoundCloudClient():
         except HTTPError:
             self._raise_not_found('user', user_id)
         except ConnectionError:
-            raise ValueError("Could not connect to SoundCloud")
+            self._raise_no_conn()
         return user
 
     def fetch_track(self, track_id):
@@ -23,7 +23,7 @@ class SoundCloudClient():
         except HTTPError:
             self._raise_not_found('track', track_id)
         except ConnectionError:
-            raise ValueError("Could not connect to SoundCloud")
+            self._raise_no_conn()
         return track
 
     def fetch_user_favorites(self, user_id):
@@ -33,7 +33,7 @@ class SoundCloudClient():
         except HTTPError:
             self._raise_not_found('favorites', user_id, parent='user')
         except ConnectionError:
-            raise ValueError("Could not connect to SoundCloud")
+            self._raise_no_conn()
         tracks = [rec.obj for rec in track_records]
         return tracks
 

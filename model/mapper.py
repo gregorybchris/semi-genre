@@ -69,11 +69,23 @@ class ModelMapper:
             'waveform_url': 'waveform_url'
         }
 
+        self._favorite_map = {
+            'favorite_id': 'favorite_id',
+            'user_id': 'user_id',
+            'track_id': 'track_id'
+        }
+
         self._date_time_fields = [
             'created_at',
             'last_modified',
             'release_date'
         ]
+
+        self._long_string_fields = {
+            'description': 5000,
+            'tag_list': 5000,
+            'purchase_url': 5000
+        }
 
     def create_user(self, user_dict):
         return self._dict_to_record(user_dict, self._user_map, User)
@@ -81,11 +93,15 @@ class ModelMapper:
     def create_track(self, track_dict):
         return self._dict_to_record(track_dict, self._track_map, Track)
 
+    def create_favorite(self, favorite_dict):
+        return self._dict_to_record(favorite_dict, self._favorite_map, Favorite)
+
     def _dict_to_record(self, record_dict, record_map, record_class):
         mapped_attributes = dict()
         for k, v in record_dict.items():
             if isinstance(v, str):
                 v = self._convert_ascii(v)
+                v = self._string_clip(k, v)
             if k in self._date_time_fields:
                 v = self._convert_datetime(v)
             if k in record_map:
@@ -98,3 +114,13 @@ class ModelMapper:
 
     def _convert_ascii(self, text):
         return re.sub(r'[^\x00-\x7F]+', '?', text)
+
+    def _string_clip(self, field, text):
+        if field in self._long_string_fields:
+            size = self._long_string_fields[field]
+        else:
+            size = 200
+
+        if len(text) > size:
+            return text[:size]
+        return text

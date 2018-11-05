@@ -9,23 +9,59 @@ sc_client = SoundCloudClient(CLIENT_ID)
 mysql_client = MySQLClient(HOST, USER, PASS, DATABASE)
 mapper = ModelMapper()
 
-user_ids = range(40)
-for user_id in user_ids:
+def save_user(user_id):
     try:
         user_dict = sc_client.fetch_user(user_id)
         user = mapper.create_user(user_dict)
         try:
             mysql_client.insert_user(user)
-            print(f"{user_id}: Created")
-        except ValueError as e:
-            print(f"{user_id}: Record Exists")
+            print(f"User Added: {user_id}")
+        except ValueError:
+            print(f"User Exists: {user_id}")
         
-        
-    except ValueError as e:
-        print(f"{user_id}: Not Found")
+        try:
+            track_dicts = sc_client.fetch_user_favorites(user_id)
+            tracks = [mapper.create_track(t) for t in track_dicts]
+            for track in tracks:
+                artist_dict = sc_client.fetch_user(track.artist_id)
+                artist = mapper.create_user(artist_dict)
+                try:
+                    mysql_client.insert_user(artist)
+                    print(f"Artist Added: {artist.user_id}")
+                except ValueError:
+                    pass
+
+                try:
+                    mysql_client.insert_track(track)
+                    print(f"Track Added: {track.track_id}")
+                    try:
+                        favorite_dict = {
+                            'user_id': user_id,
+                            'track_id': track.track_id
+                        }
+                        favorite = mapper.create_favorite(favorite_dict)
+                        mysql_client.insert_favorite(favorite)
+                    except ValueError:
+                        pass
+                except ValueError:
+                    pass
+        except ValueError:
+            pass
+    except ValueError:
+        print(f"{user_id}: User Not Found")
+
+user_ids = range(65, 1000)
+for user_id in user_ids:
+    save_user(user_id)
 
 # vs = mysql_client.get_existing_user_ids(user_ids)
 # print(vs)
 
-# user_dict = sc_client.fetch_user(6)
-# print(user_dict['last_name'])
+# user_dict = sc_client.fetch_user(407)
+# print(len(user_dict['description']))
+
+# track_dict = sc_client.fetch_track(36166315)
+# print(track_dict)
+# track = mapper.create_track(track_dict)
+# print(track)
+# mysql_client.insert_track(track)

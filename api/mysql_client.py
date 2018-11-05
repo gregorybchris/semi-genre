@@ -19,9 +19,6 @@ class MySQLClient():
 
     # User Operations
 
-    def get_existing_user_ids(self, user_ids):
-        return self._session.query(exists().where(User.user_id in user_ids))
-
     def get_user(self, user_id):
         return self._session.query(User).get(user_id)
 
@@ -43,27 +40,40 @@ class MySQLClient():
     # Track Operations
 
     def get_track(self, track_id):
-        pass
+        return self._session.query(Track).get(track_id)
 
     def get_tracks(self, track_ids):
-        pass
+        return self._session.query(Track).filter(Track.track_id.in_(track_ids)).all()
 
     def insert_track(self, track):
-        pass
+        try:
+            self._session.add(track)
+            self._session.commit()
+        except IntegrityError:
+            self._session.rollback()
+            raise ValueError(f"Track already exists with id={track.track_id}")
 
     def insert_tracks(self, tracks):
-        pass
+        self._session.bulk_save_objects(tracks)
+        self._session.commit()
 
     # Favorite Operations
 
     def get_favorite(self, favorite_id):
-        pass
+        return self._session.query(Favorite).get(favorite_id)
 
     def get_favorites(self, favorite_ids):
-        pass
+        return self._session.query(Favorite).filter(Favorite.favorite_id.in_(favorite_ids)).all()
 
     def insert_favorite(self, favorite):
-        pass
+        try:
+            self._session.add(favorite)
+            self._session.commit()
+        except IntegrityError:
+            self._session.rollback()
+            raise ValueError(f"Favorite already exists with id={favorite.favorite_id}")
 
     def insert_favorites(self, favorites):
-        pass
+        self._session.bulk_save_objects(favorites)
+        self._session.commit()
+
