@@ -2,6 +2,7 @@ from model.models import User, Track, Favorite
 from datetime import datetime
 import re
 
+
 class ModelMapper:
     def __init__(self):
         self._user_map = {
@@ -84,8 +85,18 @@ class ModelMapper:
         self._long_string_fields = {
             'description': 5000,
             'tag_list': 5000,
-            'purchase_url': 5000
+            'video_url': 1000,
+            'permalink': 1000,
+            'permalink_url': 1000,
+            'purchase_url': 5000,
+            'artwork_url': 1000,
+            'title': 1000,
+            'video_url': 1000,
+            'website': 1000,
+            'username': 1000
         }
+
+        self._short_string_length = 100
 
     def create_user(self, user_dict):
         return self._dict_to_record(user_dict, self._user_map, User)
@@ -119,7 +130,7 @@ class ModelMapper:
         if field in self._long_string_fields:
             size = self._long_string_fields[field]
         else:
-            size = 200
+            size = self._short_string_length
 
         if len(text) > size:
             return text[:size]

@@ -2,6 +2,7 @@ from model.models import User, Track, Favorite
 from sqlalchemy import create_engine
 from sqlalchemy.sql import exists
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm.exc import FlushError
 from sqlalchemy.exc import IntegrityError
 import logging
 
@@ -32,6 +33,9 @@ class MySQLClient():
         except IntegrityError:
             self._session.rollback()
             raise ValueError(f"User already exists with id={user.user_id}")
+        except FlushError:
+            self._session.rollback()
+            raise ValueError(f"User already exists with id={user.user_id}")
 
     def insert_users(self, users):
         self._session.bulk_save_objects(users)
@@ -50,6 +54,9 @@ class MySQLClient():
             self._session.add(track)
             self._session.commit()
         except IntegrityError:
+            self._session.rollback()
+            raise ValueError(f"Track already exists with id={track.track_id}")
+        except FlushError:
             self._session.rollback()
             raise ValueError(f"Track already exists with id={track.track_id}")
 
@@ -76,4 +83,3 @@ class MySQLClient():
     def insert_favorites(self, favorites):
         self._session.bulk_save_objects(favorites)
         self._session.commit()
-
