@@ -1,109 +1,69 @@
-import MySQLdb
-from configs.db_config import HOST, USERNAME, PASSWORD, DATABASE
+from model.models import User, Track, Favorite
+from sqlalchemy import create_engine
+from sqlalchemy.sql import exists
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import IntegrityError
+import logging
 
 
 class MySQLClient():
-    def __init__(self):
-        self._db = MySQLdb.connect(host=HOST, user=USERNAME, passwd=PASSWORD, db=DATABASE)
+    def __init__(self, host, user, password, database):
+        conn_str = f'mysql://{user}:{password}@{host}/{database}'
+        engine = create_engine(conn_str, echo=False)
+        self._session = sessionmaker(bind=engine)()
 
-    def select_user(self, user_id):
-        cursor = self._db.cursor(MySQLdb.cursors.DictCursor)
-        query = "SELECT * FROM users WHERE user_id = %(id)s;"
-        query_params = {'id': user_id}
-        result = cursor.execute(query, query_params)
-        if result != 1:
-            raise ValueError(f"User with id={user_id} not found")
-        user = cursor.fetchone()
-        return user
+        logging_handler = logging.FileHandler('sqla.log')
+        logger = logging.getLogger('sqlalchemy.engine')
+        logger.setLevel(logging.INFO)
+        logger.addHandler(logging_handler)
 
-    def select_users(self):
-        cursor = self._db.cursor(MySQLdb.cursors.DictCursor)
-        query = "SELECT * FROM users;"
-        result = cursor.execute(query)
-        if result != 1:
-            raise ValueError(f"No users found")
-        users = list(cursor.fetchall())
-        return users
+    # User Operations
 
-    def select_track(self, track_id):
-        cursor = self._db.cursor(MySQLdb.cursors.DictCursor)
-        query = "SELECT * FROM tracks WHERE track_id = %(id)s;"
-        query_params = {'id': track_id}
-        result = cursor.execute(query, query_params)
-        if result != 1:
-            raise ValueError(f"Track with id={track_id} not found")
-        track = cursor.fetchone()
-        return track
+    def get_existing_user_ids(self, user_ids):
+        return self._session.query(exists().where(User.user_id in user_ids))
 
-    def select_user_favorites(self, user_id):
-        cursor = self._db.cursor(MySQLdb.cursors.DictCursor)
-        query = "SELECT * FROM user_favorites WHERE user_id = %(id)s;"
-        query_params = {'id': user_id}
-        result = cursor.execute(query, query_params)
-        if result != 1:
-            raise ValueError(f"Favorites for user with id={user_id} not found")
-        tracks = list(cursor.fetchall())
-        return tracks
+    def get_user(self, user_id):
+        return self._session.query(User).get(user_id)
 
-    def select_user_tracks(self, user_id):
-        cursor = self._db.cursor(MySQLdb.cursors.DictCursor)
-        query = "SELECT * FROM tracks WHERE artist_id = %(id)s;"
-        query_params = {'id': user_id}
-        result = cursor.execute(query, query_params)
-        if result != 1:
-            raise ValueError(f"Tracks for user with id={user_id} not found")
-        tracks = list(cursor.fetchall())
-        return tracks
+    def get_users(self, user_ids):
+        return self._session.query(User).filter(User.user_id.in_(user_ids)).all()
 
-    def insert_user(self, **kwargs):
-        if 'user_id' not in kwargs:
-            raise ValueError("Keyword argument 'user_id' needed to create user")
-        
-        cursor = self._db.cursor(MySQLdb.cursors.DictCursor)
-        columns = kwargs.keys()
-        values = kwargs.values()
-        
-        # TODO: Figure out how to insert arbitrarily many values
+    def insert_user(self, user):
+        try:
+            self._session.add(user)
+            self._session.commit()
+        except IntegrityError:
+            self._session.rollback()
+            raise ValueError(f"User already exists with id={user.user_id}")
 
-        columns_string = ", ".join(columns)
-        values_string = ", ".join(values)
-        query = f"INSERT INTO users (%(columns)s) VALUES (%(values)s);"
-        query_params = {'columns': columns_string, 'values': values_string}
+    def insert_users(self, users):
+        self._session.bulk_save_objects(users)
+        self._session.commit()
 
-        print(query)
-        # result = cursor.execute(query, query_params)
-        # self._db.commit()
-        
-        # return True if result == 1 else False
+    # Track Operations
 
+    def get_track(self, track_id):
+        pass
 
-    # def insert_track(self, track):
-    #     field_names = [key for key in vars(track)]
-    #     field_values = [track[field_name] for field_name in field_names]
-        
-    #     params = ", ".join(["%s" for _ in field_names])
-    #     query = "INSERT INTO tracks (" + ", ".join(field_names) + ") VALUES (%s);" % params
-        
-    #     result = -1
-    #     try:
-    #         result = cursor.execute(query, field_values)
-    #         db.commit()
-    #     except MySQLdb.IntegrityError as error:
-    #         print("Track exists in database")
-    #     return True if result == 1 else False
+    def get_tracks(self, track_ids):
+        pass
 
+    def insert_track(self, track):
+        pass
 
-    # def insert_favorite(self, favorite):
-    #     field_names = [key for key in vars(favorite)]
-    #     field_values = [favorite[field_name] for field_name in field_names]
-        
-    #     params = ", ".join(["%s" for _ in field_names])
-    #     query = "INSERT INTO favorites (" + ", ".join(field_names) + ") VALUES (%s);" % params
-        
-    #     result = -1
-    #     try:
-    #         result = cursor.execute(query, field_values)
-    #         db.commit()
-    #     except MySQLdb.IntegrityError as error:
-    #         print("Favorite exists in database")
-    #     return True if result == 1 else False
+    def insert_tracks(self, tracks):
+        pass
+
+    # Favorite Operations
+
+    def get_favorite(self, favorite_id):
+        pass
+
+    def get_favorites(self, favorite_ids):
+        pass
+
+    def insert_favorite(self, favorite):
+        pass
+
+    def insert_favorites(self, favorites):
+        pass

@@ -1,33 +1,42 @@
 import unittest
 from api.mysql_client import MySQLClient
+from config.db_config import HOST, USER, PASS, DATABASE
 
-class SoundCloudClientTests(unittest.TestCase):
+
+class MySQLClientTests(unittest.TestCase):
     def setUp(self):
-        self._client = MySQLClient()
+        self._client = MySQLClient(HOST, USER, PASS, DATABASE)
 
-    def test_select_user(self):
+    # User Operations
+
+    def test_get_user(self):
         user_id = 0
-        user = self._client.select_user(user_id)
+        user = self._client.get_user(user_id)
         self.assertIsNotNone(user)
-    
-    def test_select_users(self):
-        users = self._client.select_users()
-        self.assertIsNotNone(users)
-    
-    def test_select_track(self):
-        track_id = 0
-        track = self._client.select_track(track_id)
-        self.assertIsNotNone(track)
 
-    def test_select_user_favorites(self):
-        user_id = 0
-        tracks = self._client.select_user_favorites(user_id)
-        self.assertIsNotNone(tracks)
-    
-    def test_select_user_tracks(self):
-        user_id = 0
-        tracks = self._client.select_user_tracks(user_id)
-        self.assertIsNotNone(tracks)
+    def test_get_users(self):
+        user_ids = [0]
+        users = self._client.get_users(user_ids)
+        print(users)
+        self.assertIsNotNone(users)
+
+    # Track Operations
+
+    # def test_get_track(self):
+    #     track_id = 0
+    #     track = self._client.get_track(track_id)
+    #     self.assertIsNotNone(track)
+
+    # def test_select_user_favorites(self):
+    #     user_id = 0
+    #     tracks = self._client.select_user_favorites(user_id)
+    #     self.assertIsNotNone(tracks)
+
+    # def test_select_user_tracks(self):
+    #     user_id = 0
+    #     tracks = self._client.select_user_tracks(user_id)
+    #     self.assertIsNotNone(tracks)
+
 
 if __name__ == '__main__':
     unittest.main()

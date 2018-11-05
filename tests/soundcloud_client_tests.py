@@ -1,15 +1,17 @@
 import unittest
 from api.soundcloud_client import SoundCloudClient
+from config.sc_config import CLIENT_ID
+
 
 class SoundCloudClientTests(unittest.TestCase):
     def setUp(self):
-        self._client = SoundCloudClient()
+        self._client = SoundCloudClient(CLIENT_ID)
 
     def test_fetch_user(self):
         user_id = 6
         user = self._client.fetch_user(user_id)
         self.assertIsNotNone(user)
-    
+
     def test_fetch_user_missing(self):
         user_id = 0
         with self.assertRaises(ValueError):
@@ -19,16 +21,17 @@ class SoundCloudClientTests(unittest.TestCase):
         track_id = 54462448
         track = self._client.fetch_track(track_id)
         self.assertIsNotNone(track)
-    
+
     def test_fetch_user_favorites(self):
         user_id = 6
         tracks = self._client.fetch_user_favorites(user_id)
         self.assertIsNotNone(tracks)
-    
+
     def test_fetch_user_tracks(self):
         user_id = 6
         tracks = self._client.fetch_user_tracks(user_id)
         self.assertIsNotNone(tracks)
+
 
 if __name__ == '__main__':
     unittest.main()
