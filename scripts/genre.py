@@ -52,6 +52,6 @@ def save_user(user_id):
         print(f"{user_id}: User Not Found")
 
 
-user_ids = range(0, 50)
+user_ids = range(7650, 10000)
 for user_id in user_ids:
     save_user(user_id)

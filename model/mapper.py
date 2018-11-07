@@ -113,6 +113,8 @@ class ModelMapper:
             if isinstance(v, str):
                 v = self._convert_ascii(v)
                 v = self._string_clip(k, v)
+            if isinstance(v, int):
+                v = self._int_clip(v)
             if k in self._date_time_fields:
                 v = self._convert_datetime(v)
             if k in record_map:
@@ -125,6 +127,12 @@ class ModelMapper:
 
     def _convert_ascii(self, text):
         return re.sub(r'[^\x00-\x7F]+', '?', text)
+
+    def _int_clip(self, n):
+        int_limit = 2000000000
+        if n > int_limit:
+            return int_limit
+        return n
 
     def _string_clip(self, field, text):
         if field in self._long_string_fields:
