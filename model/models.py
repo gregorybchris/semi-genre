@@ -29,6 +29,7 @@ class User(Base):
     followings_count = Column(Integer)
 
     tracks = relationship('Track', backref='user')
+    favorites = relationship('Favorite', backref='user')
 
     def __str__(self):
         return ("<User("
@@ -81,6 +82,8 @@ class Track(Base):
     track_type = Column(String)
     video_url = Column(String)
     waveform_url = Column(String)
+
+    favorites = relationship('Favorite', backref='track')
 
     def __str__(self):
         return ("<Track("

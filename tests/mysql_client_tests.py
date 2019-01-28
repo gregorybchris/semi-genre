@@ -22,20 +22,7 @@ class MySQLClientTests(unittest.TestCase):
 
     # Track Operations
 
-    # def test_get_track(self):
-    #     track_id = 0
-    #     track = self._client.get_track(track_id)
-    #     self.assertIsNotNone(track)
-
-    # def test_select_user_favorites(self):
-    #     user_id = 0
-    #     tracks = self._client.select_user_favorites(user_id)
-    #     self.assertIsNotNone(tracks)
-
-    # def test_select_user_tracks(self):
-    #     user_id = 0
-    #     tracks = self._client.select_user_tracks(user_id)
-    #     self.assertIsNotNone(tracks)
+    # Favorite Operations
 
 
 if __name__ == '__main__':
